@@ -1,0 +1,212 @@
+
+Total time: 0.001266 s                                                                                    
+File: /home/leus/projects/chainer-cv/chainercv/wrappers/preprocessing/resize_wrapper.py                   
+Function: _get_example at line 54                                                                         
+                                                                                                          
+Line #      Hits         Time  Per Hit   % Time  Line Contents                                            
+==============================================================                                            
+    54                                               @do_line_profile()                                   
+    55                                               def _get_example(self, in_data):                     
+    56                                                   """Returns the i-th example.                     
+    57                                                                                                    
+    58                                                   All returned images are in CHW format.           
+    59                                                                                                    
+    60                                                   Returns:                                         
+    61                                                       i-th example.                                
+    62                                                                                                    
+    63                                                   """                                              
+    64         1            2      2.0      0.2          out_data = list(in_data)                         
+    65         1            1      1.0      0.1          input_shape, output_shape = None, None           
+    66         2            2      1.0      0.2          for idx in self.preprocess_idx:                  
+    67         1            1      1.0      0.1              img = in_data[idx]                           
+    68         1            5      5.0      0.4              img = np.transpose(img, (1, 2, 0))           
+    69         1            0      0.0      0.0              if input_shape is None and output_shape is No
+ne:                                                                                                       
+    70         1            1      1.0      0.1                  input_shape = img.shape                  
+    71         1            1      1.0      0.1                  if callable(self.output_shape):          
+    72         1           64     64.0      5.1                      output_shape = self.output_shape(inpu
+t_shape)                                                                                                  
+    73                                                           else:                                    
+    74                                                               output_shape = self.output_shape     
+    75         1            1      1.0      0.1              if input_shape != img.shape:                 
+    76                                                           raise ValueError('shape of images in argu
+ments can not vary')                                                                                      
+    77                                                                                                    
+    78         1           23     23.0      1.8              scale = np.max(np.abs(img))                  
+    79         1            2      2.0      0.2              out_img = skimage.transform.resize(          
+    80         1         1147   1147.0     90.6                  img / scale, output_shape).astype(img.dty
+pe)                                                                                                       
+    81         1           13     13.0      1.0              out_data[idx] = out_img.transpose(2, 0, 1) * 
+scale                                                                                                     
+    82                                                                                                    
+    83         1            1      1.0      0.1          if self.hook is not None:                        
+    84                                                       out_data = self.hook(out_data, input_shape, o
+utput_shape)                                                                                              
+    85         1            2      2.0      0.2          return tuple(out_data)                           
+                                                                                                          
+.                                                                                                         
+
+
+
+
+
+
+
+
+
+
+
+
+Total time: 3.8e-05 s                                                                                     
+File: /home/leus/projects/chainer-cv/chainercv/wrappers/preprocessing/pad_wrapper.py                      
+Function: _get_example at line 50                                                                         
+                                                                                                          
+Line #      Hits         Time  Per Hit   % Time  Line Contents                                            
+==============================================================                                            
+    50                                               @do_line_profile()                                   
+    51                                               def _get_example(self, in_data):                     
+    52                                                   """Returns the i-th example.                     
+    53                                                                                                    
+    54                                                   Args:                                            
+    55                                                       i (int): The index of the example.           
+    56                                                                                                    
+    57                                                   Returns:                                         
+    58                                                       i-th example.                                
+    59                                                                                                    
+    60                                                   """                                              
+    61         1            2      2.0      5.3          out_data = list(in_data)                         
+    62         1            0      0.0      0.0          x_slices, y_slices = None, None                  
+    63         3            2      0.7      5.3          for idx in self.preprocess_idx:                  
+    64         2            1      0.5      2.6              img = in_data[idx]                           
+    65         2            1      0.5      2.6              if x_slices is None and y_slices is None:    
+    66         1            1      1.0      2.6                  x_slices, y_slices = self._get_pad_slices
+(                                                                                                         
+    67         1            6      6.0     15.8                      img, max_size=self.max_size)         
+    68         2           11      5.5     28.9              ones = np.ones((img.shape[0],) + self.max_siz
+e, dtype=img.dtype)                                                                                       
+    69         2            8      4.0     21.1              out_data[idx] = self.bg_values[idx] * ones   
+    70         2            5      2.5     13.2              out_data[idx][:, y_slices, x_slices] = img   
+    71                                                                                                    
+    72         1            1      1.0      2.6          return tuple(out_data)                           
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Total time: 2.2e-05 s
+File: /home/leus/projects/chainer-cv/chainercv/wrappers/preprocessing/crop_wrapper.py
+Function: _get_example at line 37
+
+Line #      Hits         Time  Per Hit   % Time  Line Contents
+==============================================================
+    37                                               @do_line_profile()
+    38                                               def _get_example(self, in_data):
+    39                                                   """Returns the i-th example.
+    40                                           
+    41                                                   All returned images are in CHW format.
+    42                                           
+    43                                                   Args:
+    44                                                       in_data (tuple): The i-th example from the wrapped dataset.
+    45                                           
+    46                                                   Returns:
+    47                                                       i-th example.
+    48                                           
+    49                                                   """
+    50         1            2      2.0      9.1          out_data = list(in_data)
+    51         2            2      1.0      9.1          for idx in self.augment_idx:
+    52         1            1      1.0      4.5              img = in_data[idx]
+    53         1            1      1.0      4.5              shape = img.shape
+    54         1            1      1.0      4.5              slices = []
+    55         1            1      1.0      4.5              for i, (width, cropped_width) in enumerate(
+    56         4            4      1.0     18.2                      zip(shape, self.cropped_shape)):
+    57         3            2      0.7      9.1                  if self.start_idx is None:
+    58                                                               if width > cropped_width:
+    59                                                                   start_idx = random.choice(range(width - cropped_width))
+    60                                                               elif width == cropped_width:
+    61                                                                   start_idx = 0
+    62                                                               else:
+    63                                                                   raise ValueError('width of an input has to be larger '
+    64                                                                                    'than values in cropped_shape')
+    65                                                           else:
+    66         3            2      0.7      9.1                      start_idx = self.start_idx[i]
+    67         3            3      1.0     13.6                  slices.append(slice(start_idx, start_idx + cropped_width))
+    68         1            2      2.0      9.1              out_data[idx] = img[tuple(slices)]
+    69         1            1      1.0      4.5          return tuple(out_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Total time: 1.8e-05 s                                                                                     
+File: /home/leus/projects/chainer-cv/chainercv/wrappers/preprocessing/flip_wrapper.py                     
+Function: _get_example at line 53                                                                         
+                                                                                                          
+Line #      Hits         Time  Per Hit   % Time  Line Contents                                            
+==============================================================                                            
+    53                                               @do_line_profile()                                   
+    54                                               def _get_example(self, in_data):                     
+    55                                                   """Returns the i-th example.                     
+    56                                                                                                    
+    57                                                   All returned images are in CHW format.           
+    58                                                                                                    
+    59                                                   Args:                                            
+    60                                                       i (int): The index of the example.           
+    61                                                                                                    
+    62                                                   Returns:                                         
+    63                                                       i-th example.                                
+    64                                                                                                    
+    65                                                   """                                              
+    66         1            2      2.0     11.1          out_data = list(in_data)                         
+    67         1            0      0.0      0.0          h_flip, v_flip = False, False                    
+    68         1            1      1.0      5.6          if 'h' in self.orientation:                      
+    69         1            8      8.0     44.4              h_flip = random.choice([True, False])        
+    70         1            0      0.0      0.0          if 'v' in self.orientation:                      
+    71                                                       v_flip = random.choice([True, False])        
+    72                                                                                                    
+    73         2            1      0.5      5.6          for idx in self.augment_idx:                     
+    74         1            1      1.0      5.6              img = in_data[idx]                           
+    75         1            1      1.0      5.6              if 'h' in self.orientation:                  
+    76         1            1      1.0      5.6                  if h_flip:                               
+    77         1            2      2.0     11.1                      img = img[:, :, ::-1]                
+    78         1            0      0.0      0.0              if 'v' in self.orientation:                  
+    79                                                           if v_flip:                               
+    80                                                               img = img[:, ::-1, :]                
+    81         1            0      0.0      0.0              out_data[idx] = img                          
+    82                                                                                                    
+    83         1            0      0.0      0.0          if self.hook is not None:                        
+    84                                                       out_data = self.hook(out_data, h_flip, v_flip
+)                                                                                                         
+    85         1            1      1.0      5.6          return tuple(out_data)                           
